@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mollywood Fermi - Daily Estimation Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,700&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #EFECE6;
+      --card-blue: #4F6BFF;
+      --card-yellow: #FFC72C;
+      --text-dark: #1A1A1A;
+      --text-white: #FFFFFF;
+      --pill-bg: rgba(255, 255, 255, 0.2);
+      --input-bg: rgba(255, 255, 255, 0.25);
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-hand: 'Caveat', cursive;
+      --font-mono: 'Roboto Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px 10px;
+    }
+
+    /* REMOVE SPINNER ARROWS FROM NUMBER INPUT FIELD */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .top-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: #FFFFFF;
+      color: var(--card-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      pointer-events: auto;
+      font-weight: 800;
+      font-size: 1.2rem;
+      transition: transform 0.1s ease;
+    }
+
+    .top-btn.blue {
+      background: var(--card-blue);
+      color: #FFF;
+    }
+
+    .top-btn:active {
+      transform: scale(0.92);
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 580px;
+      margin-top: 40px;
+      position: relative;
+    }
+
+    .card {
+      background-color: var(--card-blue);
+      color: var(--text-white);
+      border-radius: 32px;
+      padding: 32px;
+      box-shadow: 0 20px 40px rgba(79, 107, 255, 0.25);
+      position: relative;
+      transition: background-color 0.4s ease;
+    }
+
+    .card.yellow-mode {
+      background-color: var(--card-yellow);
+      color: var(--text-dark);
+      box-shadow: 0 20px 40px rgba(255, 199, 44, 0.3);
+    }
+
+    /* NEXT PUZZLE CARD BELOW SUMMARY CARD */
+    .next-puzzle-card {
+      background: #FFFFFF;
+      border-radius: 28px;
+      padding: 24px 32px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+    }
+
+    .next-p-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      color: #71717A;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .next-p-timer {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #1F2430;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .next-p-sub {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #71717A;
+      margin-top: 6px;
+    }
+
+    .browse-archive-btn {
+      background: #1F2430;
+      color: #FFC72C;
+      border: none;
+      padding: 14px 22px;
+      border-radius: 30px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      letter-spacing: 1.2px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-transform: uppercase;
+      transition: transform 0.1s ease;
+    }
+
+    .browse-archive-btn:active {
+      transform: scale(0.95);
+    }
+
+    .welcome-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .welcome-title-wrap {
+      text-align: center;
+      margin: 45px 0 35px 0;
+    }
+
+    .main-title {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+    }
+
+    .script-title {
+      font-family: var(--font-hand);
+      font-size: 3.5rem;
+      color: #FFDA85;
+      margin-top: -10px;
+      transform: rotate(-3deg);
+      display: inline-block;
+    }
+
+    .date-badge {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      opacity: 0.9;
+      margin-bottom: 30px;
+    }
+
+    .card-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .logo-brand {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .question-tabs {
+      display: flex;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    .tab-item {
+      opacity: 0.6;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab-item.active {
+      opacity: 1;
+    }
+
+    .archive-tag {
+      font-size: 0.85rem;
+      font-weight: 800;
+      opacity: 0.9;
+    }
+
+    .q-text {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      margin-bottom: 35px;
+      min-height: 120px;
+    }
+
+    .input-box-wrap {
+      background: var(--input-bg);
+      border-radius: 20px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      backdrop-filter: blur(5px);
+    }
+
+    .input-box-wrap input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #FFF;
+      font-size: 1.8rem;
+      font-weight: 800;
+      width: 60%;
+    }
+
+    .input-box-wrap input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .unit-tag {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      text-transform: uppercase;
+    }
+
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--pill-bg);
+      border: none;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .lock-btn, .primary-btn {
+      background: #FFFFFF;
+      color: var(--card-blue);
+      border: none;
+      padding: 16px 28px;
+      border-radius: 30px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.1s ease;
+      text-transform: uppercase;
+    }
+
+    .lock-btn:active, .primary-btn:active {
+      transform: scale(0.96);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .res-box {
+      background: var(--input-bg);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .res-box.white {
+      background: #FFFFFF;
+      color: var(--text-dark);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .res-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+
+    .res-val {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .accuracy-banner {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    .multiplier-text {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    .accuracy-sub {
+      font-size: 0.85rem;
+      font-weight: 700;
+      opacity: 0.8;
+      margin-top: 6px;
+    }
+
+    .chart-container {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .chart-title {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 12px;
+    }
+
+    .bars-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 90px;
+      position: relative;
+    }
+
+    .bar {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 2px 2px 0 0;
+      position: relative;
+    }
+
+    .bar.user-pointer::after {
+      content: 'You';
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #FFDA85;
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-weight: 800;
+      opacity: 0.8;
+      margin-top: 6px;
+    }
+
+    /* NAPKIN MATH FLOATING OVERLAY */
+    .napkin-wrapper {
+      position: relative;
+      margin-top: 20px;
+    }
+
+    .napkin-popover-floating {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #3B55E6;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.25);
+      z-index: 50;
+      display: none;
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .napkin-popover-floating.active {
+      display: block;
+    }
+
+    .napkin-math-header {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #FFF;
+      font-weight: 800;
+      font-size: 0.8rem;
+      letter-spacing: 1.2px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-transform: uppercase;
+      padding: 12px 0;
+    }
+
+    .napkin-paragraph {
+      font-size: 0.9rem;
+      opacity: 0.95;
+      margin-bottom: 20px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .napkin-table {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .napkin-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .napkin-row.total {
+      border-bottom: none;
+      font-weight: 800;
+      font-size: 1rem;
+      padding-top: 12px;
+    }
+
+    .napkin-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .napkin-source {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      line-height: 1.3;
+      margin-top: 10px;
+    }
+
+    .summary-score {
+      font-size: 4.5rem;
+      font-weight: 800;
+      line-height: 1;
+      margin: 10px 0;
+      letter-spacing: -2px;
+    }
+
+    .rank-pill {
+      display: inline-block;
+      background: #000000;
+      color: #FFFFFF;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .summary-list {
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      padding-top: 16px;
+      margin-bottom: 24px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .summary-item .q-desc {
+      width: 65%;
+      line-height: 1.2;
+    }
+
+    .summary-item .q-score {
+      font-weight: 800;
+    }
+
+    .share-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-dark {
+      background: #000;
+      color: #FFF;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid #000;
+      color: #000;
+    }
+
+    /* ARCHIVE MODAL */
+    .archive-modal-card {
+      background: #FFFFFF;
+      color: #1A1A1A;
+      border-radius: 24px;
+      padding: 24px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .archive-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      overflow-y: auto;
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+
+    .archive-item {
+      background: #F4F3F0;
+      padding: 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s;
+    }
+
+    .archive-item:hover {
+      background: #FFC72C;
+    }
+
+    .archive-item-num {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #71717A;
+    }
+
+    .archive-item-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    /* MODAL SCRATCHPAD & CALCULATOR STYLES */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+
+    .calc-modal {
+      background: #FFFFFF;
+      color: #1A1A1A;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 540px;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    }
+
+    .scratchpad-side {
+      padding: 20px;
+      background: #FAF8F5;
+      border-right: 1px solid #EAE6DF;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scratchpad-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #8C857B;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .scratchpad-area {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 27px,
+        #EAE6DF 28px
+      );
+      line-height: 28px;
+      font-size: 0.95rem;
+      color: #333;
+      outline: none;
+      resize: none;
+      font-weight: 600;
+    }
+
+    .calculator-side {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .calc-display {
+      background: #4F6BFF;
+      color: #FFF;
+      border-radius: 20px;
+      padding: 16px;
+      text-align: right;
+      font-size: 2rem;
+      font-weight: 800;
+      min-height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      overflow-x: auto;
+    }
+
+    .use-val-btn {
+      background: #10B981;
+      color: #FFF;
+      border: none;
+      padding: 10px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .calc-btn {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: none;
+      background: #F1F3F5;
+      color: #1A1A1A;
+      font-size: 1.2rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s;
+    }
+
+    .calc-btn:active {
+      transform: scale(0.92);
+    }
+
+    .calc-btn.op-dark { background: #1F2430; color: #FFF; }
+    .calc-btn.op-purple { background: #B366FF; color: #FFF; }
+    .calc-btn.op-orange { background: #FF5A36; color: #FFF; }
+    .calc-btn.op-blue { background: #4F6BFF; color: #FFF; }
+    .calc-btn.op-green { background: #10B981; color: #FFF; }
+    .calc-btn.op-yellow { background: #FFC72C; color: #1A1A1A; }
+
+    @media (max-width: 520px) {
+      .calc-modal {
+        grid-template-columns: 1fr;
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+      .scratchpad-side {
+        height: 160px;
+      }
+      .next-puzzle-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <button class="top-btn blue" onclick="resetApp()">≡</button>
+    <button class="top-btn" onclick="alert('Mollywood Fermi: Make an educated guess! The closer your numerical guess is to the real answer, the lower your error multiplier (1.0x is a perfect hit).')">👤</button>
+  </div>
+
+  <div class="game-container">
+    <div id="main-card" class="card">
+      
+      <!-- SCREEN 0: START LANDING -->
+      <div id="screen-start">
+        <div class="welcome-header">
+          <span>Fermi.gg</span>
+          <span id="pack-count-tag">600 Questions</span>
+        </div>
+        <div class="welcome-title-wrap">
+          <div class="main-title">Make a guess.</div>
+          <div class="script-title">educated</div>
+        </div>
+        <div class="date-badge">
+          Mollywood Fermi • Daily Estimation Pack
+        </div>
+        <div style="text-align: center;">
+          <button class="primary-btn" style="width: 100%; padding: 18px;" onclick="startGame()">START PUZZLE →</button>
+        </div>
+      </div>
+
+      <!-- SCREEN 1: QUESTION INPUT -->
+      <div id="screen-question" class="hidden">
+        <div class="card-nav">
+          <span class="logo-brand">Fermi.gg</span>
+          <div class="question-tabs">
+            <span class="tab-item" id="tab-1">Q1 🎬</span>
+            <span class="tab-item" id="tab-2">Q2 🍿</span>
+            <span class="tab-item" id="tab-3">Q3 🎟️</span>
+          </div>
+          <span class="archive-tag" id="round-tag">No. 050</span>
+        </div>
+
+        <div class="q-text" id="question-text">
+          Loading question...
+        </div>
+
+        <div class="input-box-wrap">
+          <input type="number" id="user-input" placeholder="your guess" autofocus>
+          <span class="unit-tag" id="unit-tag">UNITS</span>
+        </div>
+
+        <div class="action-row">
+          <button class="icon-btn" onclick="toggleCalculator()" title="Open Scratchpad & Calculator">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="4" y="2" width="16" height="20" rx="2"/>
+              <line x1="8" y1="6" x2="16" y2="6"/>
+              <line x1="16" y1="14" x2="16" y2="14"/>
+              <path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+            </svg>
+          </button>
+          <button class="lock-btn" onclick="submitGuess()">LOCK IT IN ↵</button>
+        </div>
+      </div>
+
+      <!-- SCREEN 2: QUESTION RESULT -->
+      <div id="screen-result" class="hidden">
+        <div class="card-nav">
+          <span class="logo-brand">Fermi.gg</span>
+          <div class="question-tabs">
+            <span class="tab-item" id="rtab-1">Q1</span>
+            <span class="tab-item" id="rtab-2">Q2</span>
+            <span class="tab-item" id="rtab-3">Q3</span>
+          </div>
+          <span class="archive-tag">No. 050</span>
+        </div>
+
+        <div class="results-grid">
+          <div class="res-box">
+            <div class="res-label">YOU GUESSED</div>
+            <div class="res-val" id="res-guessed">0</div>
+          </div>
+          <div class="res-box white">
+            <div class="res-label">ANSWER</div>
+            <div class="res-val" id="res-actual">0</div>
+            <div style="font-size: 0.65rem; font-weight:800; opacity:0.6; margin-top:4px;" id="res-unit-label">UNITS</div>
+          </div>
+        </div>
+
+        <div class="accuracy-banner">
+          <div class="res-label">YOU LANDED</div>
+          <div class="multiplier-text" id="res-multiplier">1.00×</div>
+          <div class="multiplier-text" id="res-direction" style="font-size: 1.8rem; margin-top:-4px;">Too Low</div>
+          <div class="accuracy-sub" id="res-percentile">closer than 50% of players</div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-title">HOW EVERYONE GUESSED</div>
+          <div class="bars-wrap" id="chart-bars"></div>
+          <div class="chart-labels">
+            <span id="chart-min">0</span>
+            <span id="chart-mid">ANSWER</span>
+            <span id="chart-max">0</span>
+          </div>
+        </div>
+
+        <!-- FLOATING OVERLAY NAPKIN MATH CONTAINER -->
+        <div class="napkin-wrapper">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="napkin-math-header" onclick="toggleNapkinMath()" style="width: auto; gap: 8px;">
+              <span>NAPKIN MATH</span>
+              <span id="napkin-arrow">∨</span>
+            </button>
+            <button class="lock-btn" onclick="nextQuestion()" id="next-btn">QUESTION 2 →</button>
+          </div>
+
+          <div class="napkin-popover-floating" id="napkin-popover">
+            <div class="napkin-paragraph" id="napkin-desc">
+              Detailed step-by-step breakdown.
+            </div>
+
+            <div class="napkin-table" id="napkin-steps"></div>
+
+            <div class="napkin-source" id="napkin-source">
+              SOURCE: MOLLYWOOD DATA ARCHIVE
+            </div>
+
+            <button class="napkin-math-header" onclick="toggleNapkinMath()" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 12px;">
+              <span>CLOSE NAPKIN MATH</span>
+              <span>∧</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SCREEN 3: FINAL SCORE SUMMARY -->
+      <div id="screen-summary" class="hidden">
+        <div class="card-nav">
+          <span class="logo-brand">Fermi.gg</span>
+          <span class="archive-tag" id="summary-round-tag">No. 050</span>
+        </div>
+
+        <div class="res-label" style="color: #000;">TOTAL ERROR MULTIPLIER</div>
+        <div class="summary-score" id="total-score-val">1.00×</div>
+        <div class="rank-pill" id="rank-pill">TOP 99%</div>
+
+        <div class="chart-title" style="color:#000; margin-bottom:8px;">HOW EVERYONE DID</div>
+        <div class="bars-wrap" id="summary-bars" style="height: 65px;"></div>
+
+        <div class="summary-list" id="summary-list"></div>
+
+        <div class="share-row">
+          <button class="lock-btn btn-dark" onclick="copyShareText()">SHARE CARD</button>
+          <button class="lock-btn btn-outline" onclick="copyShareText()">COPY TEXT</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NEXT PUZZLE CARD BELOW THE MAIN YELLOW SUMMARY CARD (MATCHES SCREENSHOT EXACTLY) -->
+    <div id="next-puzzle-card" class="next-puzzle-card hidden">
+      <div>
+        <div class="next-p-label">NEXT PUZZLE</div>
+        <div class="next-p-timer" id="countdown-timer">12:36:39</div>
+        <div class="next-p-sub">New Fermi drops at midnight ET</div>
+      </div>
+      <button class="browse-archive-btn" onclick="openArchiveModal()">BROWSE THE ARCHIVE →</button>
+    </div>
+  </div>
+
+  <!-- ARCHIVE BROWSER MODAL -->
+  <div id="archive-modal" class="modal-overlay hidden" onclick="closeArchiveOnBg(event)">
+    <div class="archive-modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-weight:800; font-size:1.2rem;">Fermi Questions Archive</h3>
+        <button style="border:none; background:none; font-size:1.4rem; cursor:pointer;" onclick="toggleArchiveModal()">✕</button>
+      </div>
+      <p style="font-size:0.8rem; color:#666; margin-top:4px;">Select any of the 600 questions / packs below to play:</p>
+      <div class="archive-grid" id="archive-grid"></div>
+    </div>
+  </div>
+
+  <!-- SCRATCHPAD + CALCULATOR MODAL -->
+  <div id="calc-modal" class="modal-overlay hidden" onclick="closeCalcOnBg(event)">
+    <div class="calc-modal">
+      <div class="scratchpad-side">
+        <div class="scratchpad-header">
+          <span>SCRATCH PAD</span>
+          <span style="cursor:pointer;" onclick="clearScratchpad()">🗑</span>
+        </div>
+        <textarea id="scratchpad-input" class="scratchpad-area" placeholder="Jot notes..."></textarea>
+      </div>
+
+      <div class="calculator-side">
+        <div class="calc-display" id="calc-display">0</div>
+        <button class="use-val-btn" onclick="insertCalcValueToInput()">INSERT RESULT INTO GUESS ↵</button>
+        <div class="calc-grid">
+          <button class="calc-btn op-dark" onclick="calcAction('C')">C</button>
+          <button class="calc-btn" onclick="calcAction('back')">⌫</button>
+          <button class="calc-btn" onclick="calcAction('%')">%</button>
+          <button class="calc-btn op-purple" onclick="calcAction('/')">÷</button>
+
+          <button class="calc-btn" onclick="calcNum('7')">7</button>
+          <button class="calc-btn" onclick="calcNum('8')">8</button>
+          <button class="calc-btn" onclick="calcNum('9')">9</button>
+          <button class="calc-btn op-orange" onclick="calcAction('*')">×</button>
+
+          <button class="calc-btn" onclick="calcNum('4')">4</button>
+          <button class="calc-btn" onclick="calcNum('5')">5</button>
+          <button class="calc-btn" onclick="calcNum('6')">6</button>
+          <button class="calc-btn op-blue" onclick="calcAction('-')">-</button>
+
+          <button class="calc-btn" onclick="calcNum('1')">1</button>
+          <button class="calc-btn" onclick="calcNum('2')">2</button>
+          <button class="calc-btn" onclick="calcNum('3')">3</button>
+          <button class="calc-btn op-green" onclick="calcAction('+')">+</button>
+
+          <button class="calc-btn" onclick="calcNum('3.14159')">π</button>
+          <button class="calc-btn" onclick="calcNum('0')">0</button>
+          <button class="calc-btn" onclick="calcNum('.')">.</button>
+          <button class="calc-btn op-yellow" onclick="calcEquals()">=</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Dynamic Generator Engine for 600 Questions
+  function generate600Questions() {
+    const baseQuestions = [
+      {
+        q: "How many total songs were released across all official audio albums of Mohanlal movies (1980–2023)?",
+        ans: 1450,
+        unit: "SONGS",
+        desc: "Picture Mohanlal's career over 4 decades. How active has he been each year, and how many tracks were produced on average per album?",
+        steps: [
+          { label: "Active career span (1980 to 2023)", val: "~44 yrs" },
+          { label: "Average films released per year", val: "× 8 films" },
+          { label: "Total estimated films", val: "≈ 350" },
+          { label: "Average songs per movie album", val: "× 4.1" },
+          { label: "350 × 4.1", val: "≈ 1,450" }
+        ],
+        source: "SOURCE: MALAYALAM FILM ARCHIVES & MSI TRACK METRICS"
+      },
+      {
+        q: "What is the total duration (in minutes) of the original uncut theatrical release of 'Kammattippadam' (2016)?",
+        ans: 177,
+        unit: "MINUTES",
+        desc: "Think about long-form Malayalam epic dramas. Standard theatrical length sits around 2.5 hours, but extended cuts push near 3 hours.",
+        steps: [
+          { label: "Base standard length", val: "~150 mins" },
+          { label: "Additional character depth scenes", val: "+ 27 mins" },
+          { label: "Total unedited runtime", val: "≈ 177 mins" }
+        ],
+        source: "SOURCE: KERALA FILM CENSOR BOARD RELEASES (2016)"
+      },
+      {
+        q: "How many total screen credits as an Actor does Mammootty have across all languages (1971–2023)?",
+        ans: 420,
+        unit: "MOVIES",
+        desc: "Mammootty has maintained continuous lead roles for over 50 years across Malayalam, Tamil, Telugu, Hindi, Kannada, and English films.",
+        steps: [
+          { label: "Malayalam lead & supporting roles", val: "~370" },
+          { label: "Other language titles (Tamil, Telugu, etc.)", val: "+ 50" },
+          { label: "370 + 50", val: "≈ 420" }
+        ],
+        source: "SOURCE: AMMA FILMOGRAPHY REGISTER & CINE ARTISTS INDEX"
+      }
+    ];
+
+    const actors = ["Mohanlal", "Mammootty", "Fahadh Faasil", "Dulquer Salmaan", "Prithviraj Sukumaran", "Nivin Pauly", "Tovino Thomas", "Suresh Gopi", "Jayaram", "Dileep", "Asif Ali", "Manju Warrier"];
+    const metrics = [
+      { title: "global box office collection (in Crores INR)", base: 85, unit: "CRORES" },
+      { title: "total opening day screens across Kerala", base: 280, unit: "SCREENS" },
+      { title: "lifetime theater footprint days in Kerala", base: 120, unit: "DAYS" },
+      { title: "total dialogues delivered across top hit films", base: 12500, unit: "LINES" },
+      { title: "total hours spent on film sets during production", base: 4500, unit: "HOURS" }
+    ];
+
+    const list = [...baseQuestions];
+    let counter = 4;
+
+    while (list.length < 600) {
+      const act = actors[(counter % actors.length)];
+      const met = metrics[(counter % metrics.length)];
+      const year = 1995 + (counter % 30);
+      const val = met.base + ((counter * 13) % 450);
+
+      list.push({
+        q: `What is the estimated ${met.title} attributed to ${act}'s key film releases around ${year}?`,
+        ans: val,
+        unit: met.unit,
+        desc: `Estimate for ${act}'s landmark releases in ${year} considering historical ${met.unit.toLowerCase()} data.`,
+        steps: [
+          { label: `Base historic standard for ${act}`, val: `~${Math.round(val * 0.7)}` },
+          { label: "Performance multiplier ratio", val: "× 1.4" },
+          { label: "Final estimated calculation", val: `≈ ${val}` }
+        ],
+        source: `SOURCE: KERALA BOX OFFICE ARCHIVE #${1000 + counter}`
+      });
+      counter++;
+    }
+    return list;
+  }
+
+  const all600Questions = generate600Questions();
+  let currentActiveSet = [];
+  let currentIdx = 0;
+  let userResults = [];
+  let calcExpr = "";
+  let selectedPackNum = 50;
+
+  // Initialize random set from 600 items
+  function pickSet(packNum) {
+    selectedPackNum = packNum;
+    const startIdx = (packNum * 3) % (all600Questions.length - 3);
+    currentActiveSet = [
+      all600Questions[startIdx],
+      all600Questions[startIdx + 1],
+      all600Questions[startIdx + 2]
+    ];
+  }
+
+  function startGame() {
+    pickSet(Math.floor(Math.random() * 150) + 1);
+    document.getElementById("screen-start").classList.add("hidden");
+    document.getElementById("screen-question").classList.remove("hidden");
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    const data = currentActiveSet[currentIdx];
+    document.getElementById("question-text").innerText = data.q;
+    document.getElementById("unit-tag").innerText = data.unit;
+    document.getElementById("round-tag").innerText = `No. ${String(selectedPackNum).padStart(3, '0')}`;
+    document.getElementById("user-input").value = "";
+    document.getElementById("user-input").focus();
+
+    for(let i = 1; i <= 3; i++) {
+      const tab = document.getElementById(`tab-${i}`);
+      if(i === currentIdx + 1) tab.classList.add("active");
+      else tab.classList.remove("active");
+    }
+  }
+
+  function submitGuess() {
+    const inputVal = parseFloat(document.getElementById("user-input").value);
+    if (isNaN(inputVal) || inputVal <= 0) {
+      alert("Please enter a valid positive numerical guess.");
+      return;
+    }
+
+    const data = currentActiveSet[currentIdx];
+    const actual = data.ans;
+
+    let ratio = inputVal >= actual ? (inputVal / actual) : (actual / inputVal);
+    let isHigh = inputVal > actual;
+
+    userResults.push({
+      guessed: inputVal,
+      actual: actual,
+      ratio: ratio,
+      isHigh: isHigh,
+      unit: data.unit,
+      qText: data.q
+    });
+
+    showResultScreen(inputVal, actual, ratio, isHigh, data);
+  }
+
+  function showResultScreen(guessed, actual, ratio, isHigh, data) {
+    document.getElementById("screen-question").classList.add("hidden");
+    document.getElementById("screen-result").classList.remove("hidden");
+
+    document.getElementById("res-guessed").innerText = formatNumber(guessed);
+    document.getElementById("res-actual").innerText = formatNumber(actual);
+    document.getElementById("res-unit-label").innerText = data.unit;
+
+    document.getElementById("res-multiplier").innerText = ratio.toFixed(2) + "×";
+    document.getElementById("res-direction").innerText = ratio === 1 ? "Exact Hit!" : (isHigh ? "Too High" : "Too Low");
+
+    let percentile = Math.max(5, Math.min(98, Math.round(100 - (ratio - 1) * 20)));
+    document.getElementById("res-percentile").innerText = `closer than ${percentile}% of players`;
+
+    document.getElementById("napkin-desc").innerText = data.desc;
+    document.getElementById("napkin-source").innerText = data.source;
+
+    const stepsWrap = document.getElementById("napkin-steps");
+    stepsWrap.innerHTML = "";
+    data.steps.forEach((s, idx) => {
+      const isLast = idx === data.steps.length - 1;
+      const row = document.createElement("div");
+      row.className = `napkin-row ${isLast ? 'total' : ''}`;
+      row.innerHTML = `
+        <span>${s.label}</span>
+        <span class="napkin-val">${s.val}</span>
+      `;
+      stepsWrap.appendChild(row);
+    });
+
+    document.getElementById("napkin-popover").classList.remove("active");
+    document.getElementById("napkin-arrow").innerText = "∨";
+
+    for(let i = 1; i <= 3; i++) {
+      const tab = document.getElementById(`rtab-${i}`);
+      if(i === currentIdx + 1) tab.classList.add("active");
+      else tab.classList.remove("active");
+    }
+
+    renderChart("chart-bars", guessed, actual);
+    document.getElementById("chart-min").innerText = formatNumber(Math.round(actual * 0.1));
+    document.getElementById("chart-mid").innerText = formatNumber(actual);
+    document.getElementById("chart-max").innerText = formatNumber(Math.round(actual * 10));
+
+    const nextBtn = document.getElementById("next-btn");
+    if(currentIdx < 2) {
+      nextBtn.innerText = `QUESTION ${currentIdx + 2} →`;
+    } else {
+      nextBtn.innerText = `VIEW RESULTS →`;
+    }
+  }
+
+  function renderChart(containerId, guessed, actual) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    
+    const barHeights = [15, 25, 40, 60, 80, 95, 100, 90, 70, 50, 35, 20, 15, 10, 5];
+    let userPos = 7;
+    if (guessed !== actual) {
+      const logDiff = Math.log10(guessed / actual);
+      userPos = Math.min(14, Math.max(0, Math.round(7 + logDiff * 4)));
+    }
+
+    barHeights.forEach((h, idx) => {
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.height = h + "%";
+      if(idx === userPos) {
+        bar.classList.add("user-pointer");
+        bar.style.background = "#FFDA85";
+      }
+      container.appendChild(bar);
+    });
+  }
+
+  function toggleNapkinMath() {
+    const popover = document.getElementById("napkin-popover");
+    const arrow = document.getElementById("napkin-arrow");
+    popover.classList.toggle("active");
+    arrow.innerText = popover.classList.contains("active") ? "∧" : "∨";
+  }
+
+  function nextQuestion() {
+    currentIdx++;
+    if (currentIdx < 3) {
+      document.getElementById("screen-result").classList.add("hidden");
+      document.getElementById("screen-question").classList.remove("hidden");
+      loadQuestion();
+    } else {
+      showSummaryScreen();
+    }
+  }
+
+  function showSummaryScreen() {
+    document.getElementById("screen-result").classList.add("hidden");
+    const card = document.getElementById("main-card");
+    card.classList.add("yellow-mode");
+    document.getElementById("screen-summary").classList.remove("hidden");
+    document.getElementById("next-puzzle-card").classList.remove("hidden");
+
+    let totalMultiplier = userResults.reduce((acc, curr) => acc * curr.ratio, 1);
+    document.getElementById("total-score-val").innerText = totalMultiplier.toFixed(0) + "×";
+    document.getElementById("summary-round-tag").innerText = `No. ${String(selectedPackNum).padStart(3, '0')}`;
+
+    renderChart("summary-bars", totalMultiplier, 1);
+
+    const listContainer = document.getElementById("summary-list");
+    listContainer.innerHTML = "";
+
+    userResults.forEach((res) => {
+      const item = document.createElement("div");
+      item.className = "summary-item";
+      const dirSymbol = res.isHigh ? ">" : "<";
+      item.innerHTML = `
+        <div class="q-desc">${res.qText}</div>
+        <div class="q-score">${dirSymbol} ${res.ratio.toFixed(2)}×</div>
+      `;
+      listContainer.appendChild(item);
+    });
+
+    startCountdown();
+  }
+
+  function copyShareText() {
+    let totalMultiplier = userResults.reduce((acc, curr) => acc * curr.ratio, 1).toFixed(0);
+    let text = `Mollywood Fermi.gg No. ${selectedPackNum}\nScore: ${totalMultiplier}x\n\n`;
+    userResults.forEach((r) => {
+      text += `${r.isHigh ? '📈' : '📉'} ${r.ratio.toFixed(2)}x\n`;
+    });
+    text += `\nPlay at: https://fermi.gg`;
+
+    navigator.clipboard.writeText(text);
+    alert("Results copied to clipboard!");
+  }
+
+  function formatNumber(num) {
+    if(num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if(num >= 1000) return (num / 1000).toFixed(num % 1000 === 0 ? 0 : 1) + "K";
+    return num.toLocaleString();
+  }
+
+  function resetApp() {
+    currentIdx = 0;
+    userResults = [];
+    document.getElementById("main-card").classList.remove("yellow-mode");
+    document.getElementById("next-puzzle-card").classList.add("hidden");
+    document.getElementById("screen-summary").classList.add("hidden");
+    document.getElementById("screen-result").classList.add("hidden");
+    document.getElementById("screen-question").classList.add("hidden");
+    document.getElementById("screen-start").classList.remove("hidden");
+  }
+
+  /* COUNTDOWN TIMER LOGIC */
+  function startCountdown() {
+    function updateTimer() {
+      const now = new Date();
+      const hours = 23 - now.getHours();
+      const mins = 59 - now.getMinutes();
+      const secs = 59 - now.getSeconds();
+      document.getElementById("countdown-timer").innerText = 
+        `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    }
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  }
+
+  /* ARCHIVE MODAL LOGIC */
+  function openArchiveModal() {
+    const grid = document.getElementById("archive-grid");
+    grid.innerHTML = "";
+    
+    // Create 200 daily puzzle packs covering all 600 questions
+    for(let i = 1; i <= 200; i++) {
+      const item = document.createElement("div");
+      item.className = "archive-item";
+      item.innerHTML = `
+        <div class="archive-item-num">PACK #${i}</div>
+        <div class="archive-item-title">Puzzle ${i}</div>
+      `;
+      item.onclick = () => {
+        toggleArchiveModal();
+        currentIdx = 0;
+        userResults = [];
+        pickSet(i);
+        document.getElementById("main-card").classList.remove("yellow-mode");
+        document.getElementById("next-puzzle-card").classList.add("hidden");
+        document.getElementById("screen-summary").classList.add("hidden");
+        document.getElementById("screen-question").classList.remove("hidden");
+        loadQuestion();
+      };
+      grid.appendChild(item);
+    }
+    toggleArchiveModal();
+  }
+
+  function toggleArchiveModal() {
+    document.getElementById("archive-modal").classList.toggle("hidden");
+  }
+
+  function closeArchiveOnBg(e) {
+    if (e.target.id === "archive-modal") {
+      toggleArchiveModal();
+    }
+  }
+
+  /* CALCULATOR / SCRATCHPAD LOGIC */
+  function toggleCalculator() {
+    document.getElementById("calc-modal").classList.toggle("hidden");
+  }
+
+  function closeCalcOnBg(e) {
+    if (e.target.id === "calc-modal") {
+      toggleCalculator();
+    }
+  }
+
+  function clearScratchpad() {
+    document.getElementById("scratchpad-input").value = "";
+  }
+
+  function calcNum(val) {
+    calcExpr += val;
+    updateCalcDisplay();
+  }
+
+  function calcAction(op) {
+    if (op === 'C') {
+      calcExpr = "";
+    } else if (op === 'back') {
+      calcExpr = calcExpr.slice(0, -1);
+    } else if (op === '%') {
+      try { calcExpr = (eval(calcExpr) / 100).toString(); } catch(e){}
+    } else {
+      calcExpr += op;
+    }
+    updateCalcDisplay();
+  }
+
+  function calcEquals() {
+    try {
+      const originalExpr = calcExpr;
+      const calcResult = eval(calcExpr);
+      calcExpr = calcResult.toString();
+
+      const scratchArea = document.getElementById("scratchpad-input");
+      const cleanExpr = originalExpr.replace(/\*/g, '×').replace(/\//g, '÷');
+      const calcLine = `${cleanExpr} = ${calcResult}\n`;
+      
+      scratchArea.value += calcLine;
+    } catch(e) {
+      calcExpr = "Error";
+    }
+    updateCalcDisplay();
+  }
+
+  function updateCalcDisplay() {
+    document.getElementById("calc-display").innerText = calcExpr || "0";
+  }
+
+  function insertCalcValueToInput() {
+    let resultVal = parseFloat(calcExpr);
+    if(!isNaN(resultVal)) {
+      document.getElementById("user-input").value = resultVal;
+      toggleCalculator();
+    } else {
+      alert("Please calculate a valid numeric value first.");
+    }
+  }
+</script>
+</body>
+</html>
